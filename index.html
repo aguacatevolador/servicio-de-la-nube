@@ -2,29 +2,85 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>CRUD Firebase</title>
+    <title>Producto Integrador</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
   </head>
   <body>
-    <h1>CRUD Firebase</h1>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container">
+        <a class="navbar-brand" href="#">Mi app  en un servicio de la nube</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#">Inicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Productos</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Contacto</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container mt-5">
+      <h1 class="mt-5">Agrega productos a la base de datos</h1>
 
-    <!-- Formulario para agregar un nuevo elemento -->
-    <h2>Agregar Elemento</h2>
-    <form id="addForm">
-      <input type="text" id="name" placeholder="Nombre" />
-      <input type="text" id="description" placeholder="Descripción" />
-      <button type="submit">Agregar</button>
-    </form>
+      <!-- Formulario para agregar un nuevo elemento -->
+      <h2 class="mt-3">Agregar producto</h2>
+      <div class="row">
+        <div class="col-md-6">
+          <form id="addForm">
+            <div class="form-group">
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                placeholder="Nombre"
+              />
+            </div>
+            <div class="form-group">
+              <input
+                type="text"
+                class="form-control"
+                id="description"
+                placeholder="Precio"
+              />
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control" id="mediaUrl" placeholder="URL de la imagen">
+            </div>
+            <button type="submit" class="btn btn-primary">Agregar</button>
+          </form>
+        </div>
+      </div>
+    </div>
 
     <!-- Lista de elementos -->
-    <h2>Elementos</h2>
+    <h2>Productos actuales</h2>
     <ul id="elementList">
       <!-- Los elementos se mostrarán aquí -->
     </ul>
 
     <!-- Formulario para editar un elemento -->
-    <h2>Editar Elemento</h2>
+    <h3>Editar Producto</h3>
     <form id="editForm" style="display: none">
       <input type="hidden" id="editId" />
       <input type="text" id="editName" placeholder="Nombre" />
@@ -33,6 +89,12 @@
       <button type="button" id="cancelEdit">Cancelar</button>
     </form>
 
+  </div>
+    <footer class="bg-dark text-light text-center py-3">
+      <div class="container">
+        <p>&copy; 2023 Mi Aplicación web dinámica en un servicio de la nube</p>
+      </div>
+    </footer>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -55,32 +117,34 @@
       var elementRef = database.ref("elementos");
 
       // Función para agregar un elemento
-      document
-        .getElementById("addForm")
-        .addEventListener("submit", function (e) {
-          e.preventDefault();
-          var name = document.getElementById("name").value;
-          var description = document.getElementById("description").value;
-          elementRef.push({ name: name, description: description });
-          document.getElementById("name").value = "";
-          document.getElementById("description").value = "";
-        });
+      document.getElementById("addForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  var name = document.getElementById("name").value;
+  var description = document.getElementById("description").value;
+  var mediaUrl = document.getElementById("mediaUrl").value; // Obtener la URL del medio digital
+  elementRef.push({ name: name, description: description, mediaUrl: mediaUrl });
+  document.getElementById("name").value = "";
+  document.getElementById("description").value = "";
+  document.getElementById("mediaUrl").value = ""; // Limpiar el campo de URL
+});
 
       // Función para mostrar elementos
       elementRef.on("value", function (snapshot) {
-        var elementList = document.getElementById("elementList");
-        elementList.innerHTML = "";
-        snapshot.forEach(function (childSnapshot) {
-          var childData = childSnapshot.val();
-          var listItem = document.createElement("li");
-          listItem.innerHTML = `
-                    ${childData.name}: ${childData.description}
-                    <button onclick="editElement('${childSnapshot.key}', '${childData.name}', '${childData.description}')">Editar</button>
-                    <button onclick="deleteElement('${childSnapshot.key}')">Eliminar</button>
-                `;
-          elementList.appendChild(listItem);
-        });
-      });
+  var elementList = document.getElementById("elementList");
+  elementList.innerHTML = "";
+  snapshot.forEach(function (childSnapshot) {
+    var childData = childSnapshot.val();
+    var listItem = document.createElement("li");
+    listItem.innerHTML = `
+      ${childData.name}: ${childData.description}
+      <br>
+      <a href="${childData.mediaUrl}" target="_blank">Ver imagen</a>
+      <button onclick="editElement('${childSnapshot.key}', '${childData.name}', '${childData.description}', '${childData.mediaUrl}')">Editar</button>
+      <button onclick="deleteElement('${childSnapshot.key}')">Eliminar</button>
+    `;
+    elementList.appendChild(listItem);
+  });
+});
 
       // Función para editar un elemento
       function editElement(id, name, description) {
